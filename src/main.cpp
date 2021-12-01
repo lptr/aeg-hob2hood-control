@@ -2,14 +2,19 @@
 #include <IRrecv.h>
 #include <IRutils.h>
 
-const uint8_t kRecvPin = D5;
+const uint8_t irPin = D5;
 
-IRrecv irrecv(kRecvPin);
+const uint8_t dataInPin = D7;
+const uint8_t dataOutPin = D8;
+
+IRrecv irrecv(irPin);
 
 decode_results results;
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(dataInPin, INPUT);
+    pinMode(dataOutPin, OUTPUT);
 
     Serial.begin(115200);
     while (!Serial) {
@@ -20,7 +25,7 @@ void setup() {
 
     Serial.println();
     Serial.print("IRrecvDemo is now running and waiting for IR message on Pin ");
-    Serial.println(kRecvPin);
+    Serial.println(irPin);
 }
 
 // IR commands from AEG hob2hood device
@@ -32,7 +37,7 @@ const uint64_t IRCMD_VENT_OFF = 0x55303A3;      // Hob2hood off
 const uint64_t IRCMD_LIGHT_ON = 0xE208293C;     // Light on (Hood on)
 const uint64_t IRCMD_LIGHT_OFF = 0x24ACF947;    // Light off (Automatic after 2min)
 
-bool handleCode(const decode_results& results) {
+bool handleIrCode(const decode_results& results) {
     Serial.print("Received: ");
     serialPrintUint64(results.value, HEX);
     Serial.print(" (");
@@ -76,10 +81,20 @@ bool handleCode(const decode_results& results) {
     }
 };
 
+int previousData = -1;
+
 void loop() {
+    int data = digitalRead(dataInPin);
+    if (data != previousData) {
+        previousData = data;
+        Serial.print("Data: ");
+        serialPrintUint64(data, HEX);
+        Serial.println();
+    }
+
     if (irrecv.decode(&results)) {
         digitalWrite(LED_BUILTIN, LOW);
-        if (handleCode(results)) {
+        if (handleIrCode(results)) {
             delay(1000);
         }
         irrecv.resume();
