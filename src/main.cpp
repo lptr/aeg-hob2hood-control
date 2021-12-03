@@ -7,7 +7,7 @@ const uint8_t irPin = D5;
 const uint8_t dataInPin = D7;
 const uint8_t dataOutPin = D8;
 
-IRrecv irrecv(irPin);
+IRrecv irReceiver(irPin);
 
 decode_results results;
 
@@ -21,7 +21,7 @@ void setup() {
         delay(50);
     }
 
-    irrecv.enableIRIn();
+    irReceiver.enableIRIn();
 
     Serial.println();
     Serial.print("IRrecvDemo is now running and waiting for IR message on Pin ");
@@ -92,12 +92,12 @@ void loop() {
         Serial.println();
     }
 
-    if (irrecv.decode(&results)) {
+    if (irReceiver.decode(&results)) {
         digitalWrite(LED_BUILTIN, LOW);
         if (handleIrCode(results)) {
             delay(1000);
         }
-        irrecv.resume();
+        irReceiver.resume();
     }
     delay(100);
     digitalWrite(LED_BUILTIN, HIGH);
